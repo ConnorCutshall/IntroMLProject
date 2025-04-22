@@ -1,15 +1,17 @@
 import os
+import FileReader
 
 
-def read_text_files_in_directory(directory):
-    text_contents = {}
+wd = os.getcwd()  # set working directory here if not using project folder
+data_path = os.path.join(wd, "Data")
 
-    # List all files in the specified directory
-    for filename in os.listdir(directory):
-        # Check if the file is a text file
-        if filename.endswith('.txt'):
-            file_path = os.path.join(directory, filename)
-            with open(file_path, 'r', encoding='utf-8') as file:
-                text_contents[filename] = file.read()
 
-    return text_contents
+def main():
+    data_dict = FileReader.read_text_files_by_author(data_path)
+    print(data_dict)
+    print("Here")
+
+
+if __name__ == "__main__":
+    main()
+
