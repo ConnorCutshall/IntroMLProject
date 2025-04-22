@@ -5,6 +5,19 @@ import classification
 import random
 import numpy as np
 
+################################################## Constants
+## NN Classification
+# Order
+ORDER_START = 0
+ORDER_END = 2
+TOTAL_ORDERS = 2
+# Lamda
+LAMDAA_START = 0
+LAMDAA_END = 10
+LAMDAA_ORDERS = 2
+##################################################
+
+
 # Data Gathering
 wd = os.getcwd()  # set working directory here if not using project folder
 data_path = os.path.join(wd, "Data")
@@ -68,24 +81,44 @@ def main():
     ## Get the Raw Data
     data_dict = FileReader.read_text_files_by_author(data_path)
     train_dict, test_dict = split_data(data_dict)
-    authors = np.array(data_dict.keys())
 
-    print("Training data size:", {author: len(texts) for author, texts in train_dict.items()})
-    print("Testing data size:", {author: len(texts) for author, texts in test_dict.items()})
+    ## Overwrite Test (comment out of not using)
+    """
+    train_dict = {
+        "John": ["A black cat sat on a mat", "A blue dog likes to eat the mat"],
+        "Barry": ["The flash the flash", "I am barry allen, the flash", "zoom"]
+        }
+    test_dict = {"John": ["The cat and dog are a mat that flash flash like barry allen, he goes zoom I am"]}
+    """
 
-    # Clean the texts to they are of the same format
+    # Clean the texts to they are of the same format (turn texts into a formatted array of words)
+    print("-------------")
     for author in train_dict.keys():
         train_dict[author] = do_clean_texts(train_dict[author])
+        print("Training (" + author + "): " + str(len(train_dict[author])))
     for author in test_dict.keys():
         test_dict[author] = do_clean_texts(test_dict[author])
+        print("Testing (" + author + "): " + str(len(test_dict[author])))
+    print("-------------")
 
     ## Get the Author Vectors
     vocab = get_vocab(train_dict, test_dict)
 
     # TODO: Make a check that tests out different algorithms
+    author_vectors_train = {}
+    author_vectors_test = {}
     if True:
+
+        # Make the IDF Dict
         author_vectors_train = tf_idf.get_KNN_vectors(train_dict, vocab)
-        author_vectors_test = tf_idf.get_KNN_vectors(test_dict, vocab)
+
+        # Push in the test data bit at a time (don't want to train it on itself!)
+        author_vectors_test = {}
+        for author in test_dict.keys():
+            author_vectors_test[author] = []
+            for text in test_dict[author]:
+                author_vector = tf_idf.get_KNN_vectors({author: [text]}, vocab, True)
+                author_vectors_test[author].append(author_vector[author][0])
 
     ## Get the True Labels for the Test
 
@@ -99,6 +132,7 @@ def main():
     print("Train labels shape: " + str(train_labels.shape))
     print("Train Labels: " + str(train_labels))
     print("-------------")
+    print("-------------")
     print("Test Features shape: " + str(test_features.shape))
     print("Test Features: " + str(test_features))
     print("Test true_Labels shape: " + str(test_true_labels.shape))
@@ -106,12 +140,25 @@ def main():
     print("-------------")
 
     ## NN Classification
-    test_est_labels, _min_index = classification.NN(train_features, train_labels, test_features)
+    # For each Order
+    print("CSV Output: ")
+    csv_out = "Order, Lambda, Accuracy,"
+    for order_idx in range(TOTAL_ORDERS + 1):
+        order = ORDER_START + (ORDER_END - ORDER_START)*(float(order_idx)/TOTAL_ORDERS)
 
-    print("-------------")
-    print("Test est_Labels shape: " + str(test_est_labels.shape))
-    print("Test est_Labels: " + str(test_est_labels))
-    print("-------------")
+        # For each Lamdaa
+        for lambdaa_idx in range(LAMDAA_ORDERS + 1):
+            lambdaa = LAMDAA_START + (LAMDAA_END - LAMDAA_START)*(float(lambdaa_idx)/LAMDAA_ORDERS)
+
+            # Get the Chosen Label
+            test_est_labels, _min_index = classification.NN(train_features, train_labels, test_features, order, lambdaa)
+            _class_accuracies, overall_accuracy = classification.calc_accuracy(test_true_labels, test_est_labels)
+
+            # Add to CSV Out
+            csv_out += "\n" + str(order) + ", " + str(lambdaa) + ", " + str(overall_accuracy) + ", "
+    
+    print(csv_out)
+            
 
 
 if __name__ == "__main__":
