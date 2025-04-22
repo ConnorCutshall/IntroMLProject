@@ -3,6 +3,7 @@ import random
 """ Helper Functions """
 
 def initialize_embeddings(vocab, dim):
+	random.seed(42)
 	embeddings = {}
 	for word in vocab:
 		embeddings[word] = []
