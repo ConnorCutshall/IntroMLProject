@@ -136,8 +136,6 @@ def main():
         test_dict[author] = do_clean_texts(test_dict[author])
         print("Testing (" + author + "): " + str(len(test_dict[author])))
     print("-------------")
-    print(train_dict)
-    return
 
     ## Get the Vocab
     vocab = get_vocab(train_dict, test_dict)
@@ -213,11 +211,19 @@ def main():
     
     magnitude /= vector_count
 
+    word_count = 0
+    for author in train_dict.keys():
+        for text in train_dict[author]:
+            word_count += len(text)
+    
+    word_count /= vector_count
+
     ## Simple Print
     print("-------------")
     print("Vector Size: " + str(vector_size))
     print("Vector Count (# of datasets): " + str(vector_count))
-    print("Magnitude: " + str(magnitude))
+    print("Avg Magnitude: " + str(magnitude))
+    print("Avg Words Count: " + str(word_count))
     print("-------------")
 
     ## NN Classification
