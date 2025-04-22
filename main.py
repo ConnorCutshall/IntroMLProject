@@ -16,8 +16,8 @@ import numpy as np
 
 # Order
 ORDER_START = 0
-ORDER_END = 2
-TOTAL_ORDERS = 20
+ORDER_END = 4
+TOTAL_ORDERS = 40
 # K
 K_START = 1
 K_END = 4
@@ -114,6 +114,7 @@ def save_string_to_file(content, filename):
 
 # Main
 def main():
+    random.seed(42)
 
     ## Get the Raw Data
     data_dict = FileReader.read_text_files_by_author(data_path)
