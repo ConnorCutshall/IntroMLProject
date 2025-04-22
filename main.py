@@ -22,7 +22,7 @@ LAMDAA_START = 0
 LAMDAA_END = 1000
 LAMDAA_ORDERS = 25
 # Dev Testing
-CHOSEN_ALGO = "doc_2_vec" # Choosen from ["tf_idf", "count_vectorizer", "doc_2_vec"]
+CHOSEN_ALGO = "count_vectorizer" # Choosen from ["tf_idf", "count_vectorizer", "doc_2_vec"]
 OVERWRITE_WITH_SIMPLE_TRAINING_DATA = False
 DO_CUSTOM_ORDER_AND_LAMBDA = False
 IGNORE_CSV = False
@@ -40,7 +40,7 @@ def split_data(data_dict, train_ratio= 0.8):
 
     for author, texts in data_dict.items():
         random.shuffle(texts)  # Shuffle the texts for randomness
-        split_index = 2  # int(len(texts) * train_ratio)
+        split_index = int(len(texts) * train_ratio)
 
         train_dict[author] = texts[:split_index]  # Training data
         test_dict[author] = texts[split_index:]  # Testing data
@@ -118,7 +118,9 @@ def main():
 
     ## Get the Raw Data
     data_dict = FileReader.read_text_files_by_author(data_path)
-    train_dict, test_dict = split_data(data_dict)
+    raw_train_dict, raw_test_dict = split_data(data_dict)
+    train_dict = {}
+    test_dict = {}
 
     ## Overwrite Test (comment out of not using)
     if OVERWRITE_WITH_SIMPLE_TRAINING_DATA:
@@ -130,11 +132,11 @@ def main():
 
     # Clean the texts to they are of the same format (turn texts into a formatted array of words)
     print("-------------")
-    for author in train_dict.keys():
-        train_dict[author] = do_clean_texts(train_dict[author])
+    for author in raw_train_dict.keys():
+        train_dict[author] = do_clean_texts(raw_train_dict[author])
         print("Training (" + author + "): " + str(len(train_dict[author])))
-    for author in test_dict.keys():
-        test_dict[author] = do_clean_texts(test_dict[author])
+    for author in raw_test_dict.keys():
+        test_dict[author] = do_clean_texts(raw_test_dict[author])
         print("Testing (" + author + "): " + str(len(test_dict[author])))
     print("-------------")
 
@@ -199,10 +201,12 @@ def main():
     print("-------------")
     print("Test Features shape: " + str(test_features.shape))
     if not OMIT_FEATURES_FROM_PRINTOUT:
-     print("Test Features: " + str(test_features))
+        print("Test Features: " + str(test_features))
     print("Test true_Labels shape: " + str(test_true_labels.shape))
     print("Test true_Labels: " + str(test_true_labels))
     print("-------------")
+
+    ## Temporary Print
 
     ## Misc Data
     vector_count = 0

@@ -6,9 +6,9 @@ def initialize_embeddings(vocab, dim):
 	embeddings = {}
 	for word in vocab:
 		embeddings[word] = []
-
 		for i in range(dim):
 			embeddings[word].append(random.random())
+	
 	return embeddings
 
 def document_embedding_with_window(text, embeddings, dim, window_size):
@@ -28,7 +28,7 @@ def document_embedding_with_window(text, embeddings, dim, window_size):
 		for j in range(start, end): # Window from (i - window_size) to (i + window_size)
 			word = text[j]
 			count += 1
-			
+
 			for k in range(dim):
 				vector[k] += embeddings[word][k]
 	
