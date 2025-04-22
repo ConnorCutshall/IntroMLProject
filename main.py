@@ -26,6 +26,7 @@ CHOSEN_ALGO = "doc_2_vec" # Choosen from ["tf_idf", "count_vectorizer", "doc_2_v
 OVERWRITE_WITH_SIMPLE_TRAINING_DATA = False
 DO_CUSTOM_ORDER_AND_LAMBDA = False
 IGNORE_CSV = False
+OMIT_FEATURES_FROM_PRINTOUT = True
 ##################################################
 
 
@@ -151,13 +152,15 @@ def main():
         vector_size = len(vocab)
 
         author_vectors_train = tf_idf.get_KNN_vectors(train_dict, vocab)
-
+        author_vectors_test = tf_idf.get_KNN_vectors(test_dict, vocab)
+        """
         author_vectors_test = {}
         for author in test_dict.keys():
             author_vectors_test[author] = []
             for text in test_dict[author]:
                 author_vector = tf_idf.get_KNN_vectors({author: [text]}, vocab, True)
                 author_vectors_test[author].append(author_vector[author][0])
+        """
     
     elif CHOSEN_ALGO == "count_vectorizer":
         vector_size = len(vocab)
@@ -166,12 +169,14 @@ def main():
         author_vectors_test = count_vectorizer.get_KNN_vectors(test_dict, vocab)
 
     elif CHOSEN_ALGO == "doc_2_vec":
+        # Initialization Variables
         DIMENSION = 50
-        vector_size = DIMENSION
         WINDOW_SIZE = 2
 
-        embeddings = doc_2_vec.initialize_embeddings(vocab, DIMENSION)
+        # Actual Implementaton
+        vector_size = DIMENSION
 
+        embeddings = doc_2_vec.initialize_embeddings(vocab, DIMENSION)
         author_vectors_train = doc_2_vec.get_KNN_vectors(train_dict, embeddings, DIMENSION, WINDOW_SIZE)
         author_vectors_test = doc_2_vec.get_KNN_vectors(test_dict, embeddings, DIMENSION, WINDOW_SIZE)
 
@@ -184,7 +189,8 @@ def main():
     train_features, train_labels = author_vectors_to_features_and_labels(author_vectors_train)
     print("-------------")
     print("Train Features shape: " + str(train_features.shape))
-    print("Train Features: " + str(train_features))
+    if not OMIT_FEATURES_FROM_PRINTOUT:
+        print("Train Features: " + str(train_features))
     print("Train labels shape: " + str(train_labels.shape))
     print("Train Labels: " + str(train_labels))
     print("-------------")
@@ -192,7 +198,8 @@ def main():
     test_features, test_true_labels = author_vectors_to_features_and_labels(author_vectors_test)
     print("-------------")
     print("Test Features shape: " + str(test_features.shape))
-    print("Test Features: " + str(test_features))
+    if not OMIT_FEATURES_FROM_PRINTOUT:
+     print("Test Features: " + str(test_features))
     print("Test true_Labels shape: " + str(test_true_labels.shape))
     print("Test true_Labels: " + str(test_true_labels))
     print("-------------")
@@ -220,10 +227,9 @@ def main():
 
     ## Simple Print
     print("-------------")
-    print("Vector Size: " + str(vector_size))
-    print("Vector Count (# of datasets): " + str(vector_count))
-    print("Avg Magnitude: " + str(magnitude))
-    print("Avg Words Count: " + str(word_count))
+    print("Vector Dimension: " + str(vector_size))
+    print("Avg Vector Magnitude: " + str(magnitude))
+    print("Avg Document Word Count: " + str(word_count))
     print("-------------")
 
     ## NN Classification

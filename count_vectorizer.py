@@ -1,7 +1,7 @@
 import numpy as np
 
 """ Helper Functions """
-def compute_count_vector(text, vocab):
+def get_count_vectorizer(text, vocab):
 	# Set up the dict_vector
 	dict_vector = {}
 	for word in vocab:
@@ -11,6 +11,7 @@ def compute_count_vector(text, vocab):
 	for word in text:
 		dict_vector[word] += 1
 	
+	# Add the values to vector
 	vector = []
 	for word in dict_vector:
 		vector.append(dict_vector[word])
@@ -27,7 +28,7 @@ def get_KNN_vectors(author_texts, vocab):
 
 		# Step 2: Convert each document to a count vector
 		for text in texts:
-			author_vectors[author].append(compute_count_vector(text, vocab))
+			author_vectors[author].append(get_count_vectorizer(text, vocab))
 
 	return author_vectors
 
