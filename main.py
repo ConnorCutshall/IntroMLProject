@@ -13,18 +13,19 @@ import numpy as np
 
 ################################################## Constants
 ## NN Classification
+# K
+K_VALUE = 2
+
 # Order
 ORDER_START = 0
 ORDER_END = 2
 TOTAL_ORDERS = 20
 # Lamda
 LAMDAA_START = 0
-LAMDAA_END = 1000
-LAMDAA_ORDERS = 25
+LAMDAA_END = 30
+LAMDAA_ORDERS = 120
 # Dev Testing
-CHOSEN_ALGO = "count_vectorizer" # Choosen from ["tf_idf", "count_vectorizer", "doc_2_vec"]
-OVERWRITE_WITH_SIMPLE_TRAINING_DATA = False
-DO_CUSTOM_ORDER_AND_LAMBDA = False
+CHOSEN_ALGO = "tf_idf" # Choosen from ["tf_idf", "count_vectorizer", "doc_2_vec"]
 IGNORE_CSV = False
 OMIT_FEATURES_FROM_PRINTOUT = True
 ##################################################
@@ -94,8 +95,8 @@ def author_vectors_to_features_and_labels(author_vectors):
     return train_features, train_labels
 
 # KNN Algo
-def calc_accuracy(train_features, train_labels, test_features, test_true_labels, order, lambdaa):
-    test_est_labels, _min_index = classification.NN(train_features, train_labels, test_features, order, lambdaa)
+def calc_accuracy(train_features, train_labels, test_features, test_true_labels, k, order, lambdaa):
+    test_est_labels, _min_index = classification.KNN(train_features, train_labels, test_features, k, order, lambdaa)
     _class_accuracies, overall_accuracy = classification.calc_accuracy(test_true_labels, test_est_labels)
     return overall_accuracy
 
@@ -121,14 +122,6 @@ def main():
     raw_train_dict, raw_test_dict = split_data(data_dict)
     train_dict = {}
     test_dict = {}
-
-    ## Overwrite Test (comment out of not using)
-    if OVERWRITE_WITH_SIMPLE_TRAINING_DATA:
-        train_dict = {
-            "John": ["A black cat sat on a mat", "A blue dog likes to eat the mat"],
-            "Barry": ["The flash the flash", "I am barry allen, the flash", "zoom"]
-            }
-        test_dict = {"John": ["The cat and dog are a mat that flash flash like barry allen, he goes zoom I am"]}
 
     # Clean the texts to they are of the same format (turn texts into a formatted array of words)
     print("-------------")
@@ -237,27 +230,20 @@ def main():
     print("-------------")
 
     ## NN Classification
-    # For each Order
-    if DO_CUSTOM_ORDER_AND_LAMBDA:
-        print("Custom Test, Accuracy: " + str(calc_accuracy(train_features, train_labels, test_features, test_true_labels, 2, 0)))
-    
-    ## Csv
-    else:
-        # For each Order
-        csv_out = "Order, Lambda, Accuracy,"
-        for order_idx in range(TOTAL_ORDERS + 1):
-            order = ORDER_START + (ORDER_END - ORDER_START)*(float(order_idx)/TOTAL_ORDERS)
+    csv_out = "Order, Lambda, Accuracy,"
+    for order_idx in range(TOTAL_ORDERS + 1):
+        order = ORDER_START + (ORDER_END - ORDER_START)*(float(order_idx)/TOTAL_ORDERS)
 
-            # For each Lamdaa
-            for lambdaa_idx in range(LAMDAA_ORDERS + 1):
-                lambdaa = LAMDAA_START + (LAMDAA_END - LAMDAA_START)*(float(lambdaa_idx)/LAMDAA_ORDERS)
+        # For each Lamdaa
+        for lambdaa_idx in range(LAMDAA_ORDERS + 1):
+            lambdaa = LAMDAA_START + (LAMDAA_END - LAMDAA_START)*(float(lambdaa_idx)/LAMDAA_ORDERS)
 
-                accuracy = calc_accuracy(train_features, train_labels, test_features, test_true_labels, order, lambdaa)
+            accuracy = calc_accuracy(train_features, train_labels, test_features, test_true_labels, K_VALUE, order, lambdaa)
 
-                csv_out += "\n" + str(order) + ", " + str(lambdaa) + ", " + str(accuracy) + ", "
+            csv_out += "\n" + str(order) + ", " + str(lambdaa) + ", " + str(accuracy) + ", "
 
-        if not IGNORE_CSV:
-            save_string_to_file(csv_out, CHOSEN_ALGO + ".csv")
+    if not IGNORE_CSV:
+        save_string_to_file(csv_out, CHOSEN_ALGO + ".csv")
             
 
 if __name__ == "__main__":
