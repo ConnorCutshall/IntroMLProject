@@ -1,37 +1,62 @@
 import numpy as np
-from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 
 """ Helper Functions """
-def train_doc2vec_model(texts, vector_size=50, epochs=40):
-	"""Train a Doc2Vec model on given list of texts"""
-	tagged_data = [TaggedDocument(words=text.lower().split(), tags=[str(i)])
-				   for i, text in enumerate(texts)]
+def build_vocab(texts):
+	"""Collect all unique words from a list of documents"""
+	vocab = set()
+	for text in texts:
+		for word in text.lower().split():
+			vocab.add(word)
+	return sorted(list(vocab))
 
-	model = Doc2Vec(vector_size=vector_size, min_count=1, epochs=epochs)
-	model.build_vocab(tagged_data)
-	model.train(tagged_data, total_examples=model.corpus_count, epochs=model.epochs)
+def initialize_embeddings(vocab, dim=50):
+	"""Assign a random embedding vector to each word"""
+	embeddings = {}
+	for word in vocab:
+		embeddings[word] = np.random.randn(dim)
+	return embeddings
 
-	return model
+def document_embedding_with_window(text, embeddings, dim=50, window_size=2):
+	"""Compute document vector using average of word vectors in context window"""
+	words = text.lower().split()
+	vec = np.zeros(dim)
+	count = 0
+
+	for i in range(len(words)):
+		# Window from (i - window_size) to (i + window_size)
+		start = max(0, i - window_size)
+		end = min(len(words), i + window_size + 1)
+
+		for j in range(start, end):
+			word = words[j]
+			if word in embeddings:
+				vec += embeddings[word]
+				count += 1
+
+	if count > 0:
+		vec /= count
+
+	return vec
 
 """ Main Function """
-def get_KNN_vectors(author_texts, vector_size=50):
+def get_KNN_vectors(author_texts, dim=50, window_size=2):
 	author_vectors = {}
 
 	for author in author_texts:
 		texts = author_texts[author]
-		model = train_doc2vec_model(texts, vector_size=vector_size)
+		vocab = build_vocab(texts)
+		embeddings = initialize_embeddings(vocab, dim)
 
 		author_vectors[author] = []
 		for text in texts:
-			words = text.lower().split()
-			vec = model.infer_vector(words)
-			author_vectors[author].append(np.array(vec))
+			vec = document_embedding_with_window(text, embeddings, dim, window_size)
+			author_vectors[author].append(vec)
 
 	return author_vectors
 
 """ Test """
 def test():
-	print("doc2vec TEST:")
+	print("Simple Doc2Vec w/ window TEST:")
 
 	author_texts = {
 		"donny": [
@@ -41,11 +66,11 @@ def test():
 		]
 	}
 
-	author_vectors = get_KNN_vectors(author_texts, vector_size=10)
+	author_vectors = get_KNN_vectors(author_texts, dim=10, window_size=1)
 	for author in author_vectors:
 		print(author + ":")
 		for vec in author_vectors[author]:
 			print(vec)
 
 # Uncomment to run:
-test()
+# test()
