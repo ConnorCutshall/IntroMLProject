@@ -20,7 +20,7 @@ def NN(train_features, train_labels, test_features, order=2, lambaa=0): # order 
 	for i in range(ntest):
 		
 		# Get the distances
-		base = get_distance(train_features, test_features[i], order)
+		base = get_distance(train_features - test_features[i], order)
 		penalty = lambaa*(np.count_nonzero(test_features))
 		distances = base + penalty
 
@@ -30,8 +30,8 @@ def NN(train_features, train_labels, test_features, order=2, lambaa=0): # order 
 
 	return test_labels, min_index
 
-def get_distance(one, two, order):
-	return np.linalg.norm(one - two, axis=1, ord=order)
+def get_distance(vector, order):
+	return np.linalg.norm(vector, axis=1, ord=order)
 
 def calc_accuracy(true_labels, est_labels):
 	"""

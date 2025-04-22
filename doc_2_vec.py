@@ -1,57 +1,57 @@
-import numpy as np
+import random
 
 """ Helper Functions """
-def build_vocab(texts):
-	"""Collect all unique words from a list of documents"""
-	vocab = set()
-	for text in texts:
-		for word in text.lower().split():
-			vocab.add(word)
-	return sorted(list(vocab))
 
-def initialize_embeddings(vocab, dim=50):
-	"""Assign a random embedding vector to each word"""
+def initialize_embeddings(vocab, dim):
 	embeddings = {}
 	for word in vocab:
-		embeddings[word] = np.random.randn(dim)
+		embeddings[word] = []
+
+		for i in range(dim):
+			embeddings[word].append(random.random())
 	return embeddings
 
-def document_embedding_with_window(text, embeddings, dim=50, window_size=2):
+def document_embedding_with_window(text, embeddings, dim, window_size):
 	"""Compute document vector using average of word vectors in context window"""
-	words = text.lower().split()
-	vec = np.zeros(dim)
+
+	# Create the Vector
+	vector = []
+	for i in range(dim):
+		vector.append(0)
+
+	# Populate the Dict Vector
 	count = 0
-
-	for i in range(len(words)):
-		# Window from (i - window_size) to (i + window_size)
+	for i in range(len(text)):
 		start = max(0, i - window_size)
-		end = min(len(words), i + window_size + 1)
+		end = min(len(text), i + window_size + 1)
 
-		for j in range(start, end):
-			word = words[j]
-			if word in embeddings:
-				vec += embeddings[word]
-				count += 1
-
-	if count > 0:
-		vec /= count
-
-	return vec
+		for j in range(start, end): # Window from (i - window_size) to (i + window_size)
+			word = text[j]
+			count += 1
+			
+			for k in range(dim):
+				vector[k] += embeddings[word][k]
+	
+	# Divide by the Count
+	for k in range(dim):
+		vector[k] /= count
+	
+	# Return
+	return vector
 
 """ Main Function """
-def get_KNN_vectors(author_texts, dim=50, window_size=2):
+def get_KNN_vectors(author_texts, embeddings, dim, window_size):
+	# For Each Author
 	author_vectors = {}
-
 	for author in author_texts:
 		texts = author_texts[author]
-		vocab = build_vocab(texts)
-		embeddings = initialize_embeddings(vocab, dim)
 
+		# Process each Vector
 		author_vectors[author] = []
 		for text in texts:
-			vec = document_embedding_with_window(text, embeddings, dim, window_size)
-			author_vectors[author].append(vec)
+			author_vectors[author].append(document_embedding_with_window(text, embeddings, dim, window_size))
 
+	# Return
 	return author_vectors
 
 """ Test """

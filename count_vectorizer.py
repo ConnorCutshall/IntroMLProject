@@ -1,39 +1,29 @@
 import numpy as np
 
 """ Helper Functions """
-def compute_vocab(texts):
-	"""Extract sorted list of unique words across all documents"""
-	vocab_set = set()
-	for doc in texts:
-		for word in doc.lower().split():
-			vocab_set.add(word)
-	return sorted(list(vocab_set))
-
 def compute_count_vector(text, vocab):
-	"""Compute raw count vector for a single document"""
-	words = text.lower().split()
-	counts = {word: 0 for word in vocab}
-
-	for word in words:
-		if word in counts:
-			counts[word] += 1
-
-	vector = []
+	# Set up the dict_vector
+	dict_vector = {}
 	for word in vocab:
-		vector.append(counts[word])
+		dict_vector[word] = 0
+
+	# Populate the dict_vector
+	for word in text:
+		dict_vector[word] += 1
 	
-	return np.array(vector)
+	vector = []
+	for word in dict_vector:
+		vector.append(dict_vector[word])
+
+	return vector
 
 """ Main Function """
-def get_KNN_vectors(author_texts):
-	author_vectors = {}
+def get_KNN_vectors(author_texts, vocab):
 
+	author_vectors = {}
 	for author in author_texts:
 		author_vectors[author] = []
 		texts = author_texts[author]
-
-		# Step 1: Learn vocabulary from all texts by this author
-		vocab = compute_vocab(texts)
 
 		# Step 2: Convert each document to a count vector
 		for text in texts:
