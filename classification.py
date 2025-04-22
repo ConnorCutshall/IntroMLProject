@@ -13,6 +13,7 @@ def NN(train_features, train_labels, test_features, ord=2): # order of the norm 
 	- min_index: an ntest-length vector of the training data point that is closest
 				to each test data point
 	"""
+	print("Test features shape: " , test_features.shape)
 	ntest = test_features.shape[0]
 	test_kNN = np.zeros(ntest, dtype=train_labels.dtype)
 	min_index = np.zeros(ntest, dtype=int)
