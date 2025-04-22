@@ -1,0 +1,87 @@
+import numpy as np
+import math
+
+""" Helper Functions """
+def compute_tf(text):
+	"""Compute term frequency vector for a document"""
+	words = text.lower().split()
+	word_count = {}
+
+	# Count each word's frequency
+	for word in words:
+		if word not in word_count:
+			word_count[word] = 1
+		else:
+			word_count[word] += 1
+
+	total_terms = len(words)
+
+	# Compute TF values
+	tf_vector = {}
+	for word in word_count:
+		tf_vector[word] = word_count[word] / total_terms
+
+	return tf_vector
+
+def compute_idf(texts):
+	"""Compute IDF values for all terms in the corpus"""
+	N = len(texts)
+
+	# Build a set of all unique words
+	all_words = set()
+	for doc in texts:
+		words = doc.lower().split()
+		for word in words:
+			all_words.add(word)
+
+	# Count how many documents contain each word
+	idf_dict = {}
+	for word in all_words:
+		doc_count = 0
+		for doc in texts:
+			if word in doc.lower().split():
+				doc_count += 1
+		idf_dict[word] = math.log(N / (1 + doc_count))  # Add 1 to avoid division by zero
+
+	return idf_dict
+
+def compute_tfidf_vector(text, idf_dict):
+	"""Compute TF-IDF vector using a precomputed IDF dictionary"""
+	tf = compute_tf(text)
+
+	# Construct the TF-IDF vector
+	tfidf_vector = []
+	for word in idf_dict:
+		tf_value = 0
+		if word in tf:
+			tf_value = tf[word]
+		tfidf_score = tf_value * idf_dict[word]
+		tfidf_vector.append(tfidf_score)
+
+	return np.array(tfidf_vector)
+
+""" Main Function """
+def get_KNN_vectors(texts):
+	idf_dict = compute_idf(texts)
+	vectors = []
+
+	for text in texts:
+		vector = compute_tfidf_vector(text, idf_dict)
+		vectors.append(vector)
+
+	return vectors
+
+""" Test """
+def test():
+	print("tf_idf TEST:")
+
+	corpus = [
+	"the cat sat on the mat",
+	"the dog sat on the log",
+	"cats and dogs are friends"
+    ]
+	vectors = get_KNN_vectors(corpus)
+	for i in range(len(vectors)):
+		print(str(corpus[i]) + ": " + str(vectors[i]))
+
+test()

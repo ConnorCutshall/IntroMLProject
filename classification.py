@@ -1,6 +1,5 @@
-print("boot")
-
-import numpy as np # generally useful for vector work
+import numpy as np
+import math
 
 def NN(train_features, train_labels, test_features, ord=2): # order of the norm to pass to the linalg.norm function
 	"""
