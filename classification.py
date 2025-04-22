@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-def NN(train_features, train_labels, test_features, ord=2): # order of the norm to pass to the linalg.norm function
+def NN(train_features, train_labels, test_features, order=2, lambaa=0): # order of the norm to pass to the linalg.norm function
 	"""
 	Nearest neighbor algorithm where
 	train_features contains training data (size ntrain x nfeatures),
@@ -19,11 +19,19 @@ def NN(train_features, train_labels, test_features, ord=2): # order of the norm 
 
 	for i in range(ntest):
 		
-		distances = np.linalg.norm(train_features - test_features[i], axis=1, ord=ord)
+		# Get the distances
+		base = get_distance(train_features - test_features[i], order)
+		penalty = lambaa*(np.count_nonzero(test_features))
+		distances = base + penalty
+
+		# Get the best fitting label
 		min_index[i] = np.argmin(distances)
 		test_labels[i] = train_labels[min_index[i]]
 
 	return test_labels, min_index
+
+def get_distance(vector, order):
+	return np.linalg.norm(vector, axis=1, ord=order)
 
 def calc_accuracy(true_labels, est_labels):
 	"""
