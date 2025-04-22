@@ -89,5 +89,3 @@ def test():
 	author_vectors = get_KNN_vectors(author_texts)
 	for author in author_vectors:
 		print(author + ": " + str(author_vectors[author]))
-
-test()
