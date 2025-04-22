@@ -13,17 +13,15 @@ import numpy as np
 
 ################################################## Constants
 ## NN Classification
-# K
-K_VALUE = 2
 
 # Order
 ORDER_START = 0
 ORDER_END = 2
 TOTAL_ORDERS = 20
-# Lamda
-LAMDAA_START = 0
-LAMDAA_END = 30
-LAMDAA_ORDERS = 120
+# K
+K_START = 1
+K_END = 4
+K_ORDERS = 3
 # Dev Testing
 CHOSEN_ALGO = "tf_idf" # Choosen from ["tf_idf", "count_vectorizer", "doc_2_vec"]
 IGNORE_CSV = False
@@ -230,17 +228,17 @@ def main():
     print("-------------")
 
     ## NN Classification
-    csv_out = "Order, Lambda, Accuracy,"
+    csv_out = "Order, K, Accuracy,"
     for order_idx in range(TOTAL_ORDERS + 1):
         order = ORDER_START + (ORDER_END - ORDER_START)*(float(order_idx)/TOTAL_ORDERS)
 
-        # For each Lamdaa
-        for lambdaa_idx in range(LAMDAA_ORDERS + 1):
-            lambdaa = LAMDAA_START + (LAMDAA_END - LAMDAA_START)*(float(lambdaa_idx)/LAMDAA_ORDERS)
+        # For each K
+        for K_idx in range(K_ORDERS + 1):
+            K = int(K_START + (K_END - K_START)*(float(K_idx)/K_ORDERS))
 
-            accuracy = calc_accuracy(train_features, train_labels, test_features, test_true_labels, K_VALUE, order, lambdaa)
+            accuracy = calc_accuracy(train_features, train_labels, test_features, test_true_labels, K, order, 0)
 
-            csv_out += "\n" + str(order) + ", " + str(lambdaa) + ", " + str(accuracy) + ", "
+            csv_out += "\n" + str(order) + ", " + str(K) + ", " + str(accuracy) + ", "
 
     if not IGNORE_CSV:
         save_string_to_file(csv_out, CHOSEN_ALGO + ".csv")
