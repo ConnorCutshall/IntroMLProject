@@ -61,27 +61,33 @@ def compute_tfidf_vector(text, idf_dict):
 	return np.array(tfidf_vector)
 
 """ Main Function """
-def get_KNN_vectors(texts):
-	idf_dict = compute_idf(texts)
-	vectors = []
+def get_KNN_vectors(author_texts):
 
-	for text in texts:
-		vector = compute_tfidf_vector(text, idf_dict)
-		vectors.append(vector)
+	author_vectors = {}
+	for author in author_texts:
+		author_vectors[author] = []
 
-	return vectors
+		texts = author_texts[author]
+		idf_dict = compute_idf(texts)
+
+		for text in texts:
+			author_vectors[author].append(compute_tfidf_vector(text, idf_dict))
+
+	return author_vectors
 
 """ Test """
 def test():
 	print("tf_idf TEST:")
 
-	corpus = [
-	"the cat sat on the mat",
-	"the dog sat on the log",
-	"cats and dogs are friends"
-    ]
-	vectors = get_KNN_vectors(corpus)
-	for i in range(len(vectors)):
-		print(str(corpus[i]) + ": " + str(vectors[i]))
+	author_texts = {
+		"donny": [
+			"the cat sat on the mat",
+			"the dog sat on the log",
+			"cats and dogs are friends"
+		]
+    }
+	author_vectors = get_KNN_vectors(author_texts)
+	for author in author_vectors:
+		print(author + ": " + str(author_vectors[author]))
 
 test()
