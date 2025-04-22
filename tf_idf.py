@@ -2,76 +2,69 @@ import numpy as np
 import math
 
 """ Helper Functions """
-def compute_tf(text):
+def compute_tf(text, vocab):
 	"""Compute term frequency vector for a document"""
-	words = text.lower().split()
-	word_count = {}
 
-	# Count each word's frequency
-	for word in words:
-		if word not in word_count:
-			word_count[word] = 1
-		else:
-			word_count[word] += 1
+	# Get the Frequency Dictionary
+	freq_dict = {}
+	for word in vocab:
+		freq_dict[word] = 0
 
-	total_terms = len(words)
+	# Populate the Freq_Dict
+	for word in text:
+		freq_dict[word] += 1
+	
+	# Get the Average of each Word's appearence
+	tf_dict = {}
+	for word in freq_dict:
+		tf_dict[word] = freq_dict[word] / len(vocab)
 
-	# Compute TF values
-	tf_vector = {}
-	for word in word_count:
-		tf_vector[word] = word_count[word] / total_terms
+	return tf_dict
 
-	return tf_vector
-
-def compute_idf(texts):
+def compute_idf(texts, vocab):
 	"""Compute IDF values for all terms in the corpus"""
-	N = len(texts)
-
-	# Build a set of all unique words
-	all_words = set()
-	for doc in texts:
-		words = doc.lower().split()
-		for word in words:
-			all_words.add(word)
-
 	# Count how many documents contain each word
+
+	# For Each Word
 	idf_dict = {}
-	for word in all_words:
+	N = len(texts)
+	for word in vocab:
+
+		# Get the amount of times a word in all of the documents
 		doc_count = 0
-		for doc in texts:
-			if word in doc.lower().split():
+		for text in texts:
+			if word in texts:
 				doc_count += 1
-		idf_dict[word] = math.log(N / (1 + doc_count))  # Add 1 to avoid division by zero
+		idf_dict[word] = N / (1 + doc_count)#math.log(N / (1 + doc_count))  # Add 1 to avoid division by zero
 
 	return idf_dict
 
-def compute_tfidf_vector(text, idf_dict):
+def compute_tfidf_vector(tf_dict, idf_dict):
 	"""Compute TF-IDF vector using a precomputed IDF dictionary"""
-	tf = compute_tf(text)
 
 	# Construct the TF-IDF vector
 	tfidf_vector = []
 	for word in idf_dict:
-		tf_value = 0
-		if word in tf:
-			tf_value = tf[word]
-		tfidf_score = tf_value * idf_dict[word]
-		tfidf_vector.append(tfidf_score)
+		tfidf_vector.append(tf_dict[word] * idf_dict[word])
 
-	return np.array(tfidf_vector)
+	return tfidf_vector
 
 """ Main Function """
-def get_KNN_vectors(author_texts):
+def get_KNN_vectors(author_texts, vocab):
 
+	# For Each Author
 	author_vectors = {}
 	for author in author_texts:
 		author_vectors[author] = []
 
+		# Get the Texts and the idf_dict
 		texts = author_texts[author]
-		idf_dict = compute_idf(texts)
+		idf_dict = compute_idf(texts, vocab)
 
+		# For Each Text, Compute the Author Vector
 		for text in texts:
-			author_vectors[author].append(compute_tfidf_vector(text, idf_dict))
+			tf_dict = compute_tf(text, vocab)
+			author_vectors[author].append(compute_tfidf_vector(tf_dict, idf_dict))
 
 	return author_vectors
 

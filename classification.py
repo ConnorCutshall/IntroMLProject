@@ -9,21 +9,21 @@ def NN(train_features, train_labels, test_features, ord=2): # order of the norm 
 	test_features  contains test data (size ntest x nfeatures).
 
 	Returns:
-	- test_kNN: an ntest-length vector of the estimated class for each test point
+	- test_kNN (aka test_labels): an ntest-length vector of the estimated class for each test point
 	- min_index: an ntest-length vector of the training data point that is closest
 				to each test data point
 	"""
-	print("Test features shape: " , test_features.shape)
 	ntest = test_features.shape[0]
-	test_kNN = np.zeros(ntest, dtype=train_labels.dtype)
+	test_labels = np.zeros(ntest, dtype=train_labels.dtype)
 	min_index = np.zeros(ntest, dtype=int)
 
 	for i in range(ntest):
+		
 		distances = np.linalg.norm(train_features - test_features[i], axis=1, ord=ord)
 		min_index[i] = np.argmin(distances)
-		test_kNN[i] = train_labels[min_index[i]]
+		test_labels[i] = train_labels[min_index[i]]
 
-	return test_kNN, min_index
+	return test_labels, min_index
 
 def calc_accuracy(true_labels, est_labels):
 	"""
